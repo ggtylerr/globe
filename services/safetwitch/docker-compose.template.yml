@@ -1,0 +1,53 @@
+services:
+  safetwitch-frontend:
+    container_name: safetwitch-frontend
+    hostname: safetwitch-frontend
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    restart: always
+    image: codeberg.org/safetwitch/safetwitch:latest
+    ports:
+      - "54307:8280"
+    environment:
+      - SAFETWITCH_BACKEND_DOMAIN=backendCHANGEME
+      - SAFETWITCH_INSTANCE_DOMAIN=frontendCHANGEME
+      - SAFETWITCH_HTTPS=true
+      - SAFETWITCH_DEFAULT_LOCALE=en
+      - SAFETWITCH_FALLBACK_LOCALE=en
+      - SAFETWITCH_DEFAULT_THEME=dark
+    healthcheck:
+      test: wget -nv --tries=1 --spider http://localhost:8280
+      interval: 30s
+      timeout: 5s
+      retries: 2
+  safetwitch-backend:
+    container_name: safetwitch-backend
+    hostname: safetwitch-backend
+    user: 65534:65534
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: always
+    image: codeberg.org/safetwitch/safetwitch-backend:latest
+    ports:
+      - "54308:7000"
+    environment:
+      - PORT=7000
+      - URL=backendCHANGEME
+    healthcheck:
+      test: wget -nv --tries=1 --spider http://localhost:7000/api/discover
+      interval: 30s
+      timeout: 5s
+      retries: 2
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

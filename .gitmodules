@@ -1,0 +1,12 @@
+[submodule "smart-ipv6-rotator"]
+	path = smart-ipv6-rotator
+	url = https://github.com/iv-org/smart-ipv6-rotator.git
+[submodule "poke"]
+	path = services/poke
+	url = https://codeberg.org/ashley/poke.git
+[submodule "services/simplytranslate"]
+	path = services/simplytranslate
+	url = https://codeberg.org/ManeraKai/simplytranslate.git
+[submodule "services/invidious"]
+	path = services/invidious
+	url = https://github.com/iv-org/invidious.git

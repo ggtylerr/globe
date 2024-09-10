@@ -1,0 +1,13 @@
+services:
+  lingva:
+    image: thedaviddelta/lingva-translate:latest
+    container_name: lingva
+    restart: unless-stopped
+    environment:
+      - site_domain:changeme
+    ports:
+      - "54317:3000"
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

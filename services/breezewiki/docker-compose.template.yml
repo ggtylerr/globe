@@ -1,0 +1,18 @@
+services:
+  breezewiki:
+    container_name: breezewiki
+    image: quay.io/pussthecatorg/breezewiki:latest
+    restart: unless-stopped
+    ports:
+      - "54310:54310"
+    volumes:
+      - "./config.ini:/app/config.ini"
+    healthcheck:
+      test: curl --fail http://localhost:54310/pokemon/wiki/Eevee || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 2
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

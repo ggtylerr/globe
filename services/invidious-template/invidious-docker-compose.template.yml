@@ -1,0 +1,159 @@
+services:
+  invidious:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    deploy:
+      replicas: 5
+    restart: unless-stopped
+    environment:
+      INVIDIOUS_CONFIG: |
+        db:
+          dbname: invidious
+          user: kemal
+          password: kemal
+          host: pgbouncer
+          port: 5432
+        check_tables: true
+        statistics_enabled: true
+        admins:
+          - changeme
+        external_port: 443
+        domain: changeme
+        force_resolve: ipv6
+        host_binding: ::0
+        https_only: true
+        hmac_key: changeme
+        banner: changeme
+        enable_user_notifications: false
+        channel_threads: 0
+        feed_threads: 0
+        use_innertube_for_captions: true
+        po_token: changeme
+        visitor_data: changeme
+        signature_server: sighelper:8080
+    healthcheck:
+      test: wget -nv --tries=1 --spider http://127.0.0.1:3000/api/v1/comments/jNQXAC9IVRw || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 2
+    depends_on:
+      - pgbouncer
+      - sighelper
+
+  invidious-refresh:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    restart: unless-stopped
+    environment:
+      INVIDIOUS_CONFIG: |
+        db:
+          dbname: invidious
+          user: kemal
+          password: kemal
+          host: pgbouncer
+          port: 5432
+        check_tables: true
+        statistics_enabled: true
+        admins:
+          - changeme
+        external_port: 443
+        domain: changeme
+        force_resolve: ipv6
+        host_binding: ::0
+        https_only: true
+        hmac_key: changeme
+        banner: changeme
+        enable_user_notifications: false
+        use_pubsub_feeds: true
+        po_token: changeme
+        visitor_data: changeme
+        signature_server: sighelper:8080
+    healthcheck:
+      test: wget -nv --tries=1 --spider http://127.0.0.1:3000/api/v1/comments/jNQXAC9IVRw || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 2
+    depends_on:
+      - pgbouncer
+      - sighelper
+
+  invidious-db:
+    image: docker.io/library/postgres:14
+    restart: unless-stopped
+    volumes:
+      - postgresdata:/var/lib/postgresql/data
+      - ./config/sql:/config/sql
+      - ./docker/init-invidious-db.sh:/docker-entrypoint-initdb.d/init-invidious-db.sh
+      - ./docker/pg-tune.sql:/docker-entrypoint-initdb.d/pgtune.sql
+      - ./backups:/backups
+    environment:
+      POSTGRES_DB: invidious
+      POSTGRES_USER: kemal
+      POSTGRES_PASSWORD: kemal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    restart: unless-stopped  
+    environment:
+      - DB_USER=kemal
+      - DB_PASSWORD=kemal
+      - DB_HOST=invidious-db
+      - DB_NAME=invidious
+      - POOL_MODE=transaction
+      - DEFAULT_POOL_SIZE=80
+      - MIN_POOL_SIZE=20
+      - RESERVE_POOL_SIZE=80
+      - RESERVE_POOL_TIMEOUT=5
+      - MAX_DB_CONNECTIONS=160
+      - MAX_USER_CONNECTIONS=160
+      - MAX_CLIENT_CONN=1000
+      - AUTH_TYPE=scram-sha-256
+      - IGNORE_STARTUP_PARAMETERS=extra_float_digits
+    volumes:
+      - ./docker/userlist.txt:/etc/pgbouncer/userlist.txt:rw
+    depends_on:
+      - "invidious-db"
+    ports:
+      - "5432:5432"
+
+  sighelper:
+    image: quay.io/invidious/inv-sig-helper:latest
+    command: ["--tcp", "0.0.0.0:8080"]
+    environment:
+      - RUST_LOG=info
+    restart: unless-stopped
+    cap_drop:
+      - ALL
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+      
+  nginx:
+    image: nginx:latest
+    restart: unless-stopped
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - invidious
+    ports:
+      - "54301:3000"
+  
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  postgresdata:
+
+networks:
+  default:
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: fd01:db8:a::/64
+          gateway: fd01:db8:a::1

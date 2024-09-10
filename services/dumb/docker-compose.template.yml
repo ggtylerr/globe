@@ -1,0 +1,10 @@
+services:
+  dumb:
+    image: ghcr.io/rramiachraf/dumb:latest
+    container_name: dumb
+    ports:
+      - "54309:5555"
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

@@ -1,0 +1,11 @@
+docker-compose.yml
+# Service configs
+services/breezewiki/config.ini
+services/cobalt/cookies.json
+services/searxng/.env
+services/searxng/config/settings.yml
+services/searxng/config/limiter.toml
+services/searxng/config/uwsgi.ini
+# GLOBE configs
+range.txt
+ntfy.txt

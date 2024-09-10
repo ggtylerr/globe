@@ -1,0 +1,47 @@
+services:
+
+  cobalt-web:
+    image: ghcr.io/imputnet/cobalt:latest
+    restart: unless-stopped
+    container_name: cobalt-web
+    init: true
+    ports:
+      - 54311:9001/tcp
+    environment:
+      - WEB_PORT=9001
+      - WEB_URL=frontendCHANGEME
+      - API_URL=backendCHANGEME
+    labels:
+      - com.centurylinklabs.watchtower.scope=cobalt
+      
+  cobalt-api:
+    image: ghcr.io/imputnet/cobalt:latest
+    restart: unless-stopped
+    container_name: cobalt-api
+    init: true
+    ports:
+      - 54312:9000/tcp
+    environment:
+      - API_PORT=9000
+      - API_URL=backendCHANGEME
+      - API_NAME=nameCHANGEME
+      - COOKIE_PATH=/cookies.json
+    labels:
+      - com.centurylinklabs.watchtower.scope=cobalt
+    volumes:
+      - ./cookies.json:/cookies.json
+
+  watchtower:
+    image: ghcr.io/containrrr/watchtower
+    restart: unless-stopped
+    command: --cleanup --scope cobalt --interval 900
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+networks:
+  default:
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: fd01:db8:c::/64
+          gateway: fd01:db8:c::1

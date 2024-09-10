@@ -1,0 +1,34 @@
+services:
+  hyperpipe-frontend:
+    image: codeberg.org/hyperpipe/hyperpipe:latest
+    container_name: hyperpipe-frontend
+    environment:
+      - HYP_API=HYPERPIPE_API_URL
+      - PIPED_API=PIPED_API_URL
+    restart: unless-stopped
+    ports:
+      - '54303:80'
+    healthcheck:
+      test: curl --fail http://localhost:80 || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 2
+  hyperpipe-backend:
+    image: codeberg.org/hyperpipe/hyperpipe-backend:latest
+    container_name: hyperpipe-backend
+    environment:
+      - HYP_PROXY=PIPED_PROXY_URL
+    restart: unless-stopped
+    ports:
+      - '54304:3000'
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/timezone:/etc/timezone:ro
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_INCLUDE_RESTARTING=true
+    command: hyperpipe-frontend hyperpipe-backend watchtower
