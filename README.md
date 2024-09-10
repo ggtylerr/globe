@@ -10,7 +10,7 @@ allowing modifications for any changes necessary.
 To start, simply run `scripts/init.sh`:
 
 ```sh
-git clone https://github.com/ggtylerr/globe
+git clone --recurse-submodules https://github.com/ggtylerr/globe
 cd globe
 chmod +x scripts/init.sh
 ./scripts/init.sh

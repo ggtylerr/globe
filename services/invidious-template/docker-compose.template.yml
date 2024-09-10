@@ -1,8 +1,8 @@
 services:
   invidious:
     build:
-      context: .
-      dockerfile: docker/Dockerfile
+      context: ../..
+      dockerfile: services/invidious/docker/Dockerfile
     deploy:
       replicas: 5
     restart: unless-stopped
@@ -43,8 +43,8 @@ services:
 
   invidious-refresh:
     build:
-      context: .
-      dockerfile: docker/Dockerfile
+      context: ../..
+      dockerfile: services/invidious/docker/Dockerfile
     restart: unless-stopped
     environment:
       INVIDIOUS_CONFIG: |
@@ -80,7 +80,7 @@ services:
       - sighelper
 
   invidious-db:
-    image: docker.io/library/postgres:14
+    image: docker.io/library/postgres:13
     restart: unless-stopped
     volumes:
       - postgresdata:/var/lib/postgresql/data

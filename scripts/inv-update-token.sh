@@ -11,10 +11,10 @@ if [ -z "$visitor_data" ] || [ -z "$po_token" ]; then
   exit 1
 fi
 
-sed -i "s/visitor_data: .*/visitor_data: $visitor_data/g" ../services/invidious/docker-compose.yml
-sed -i "s/po_token: .*/po_token: $po_token/g" ../invidious/docker-compose.yml
+sed -i "s/visitor_data: .*/visitor_data: $visitor_data/g" $scriptDir/../services/invidious/docker-compose.yml
+sed -i "s/po_token: .*/po_token: $po_token/g" $scriptDir/../services/invidious/docker-compose.yml
 
-cd $scriptDir/services/invidious
+cd $scriptDir/../services/invidious
 docker compose down
 docker compose up -d
 

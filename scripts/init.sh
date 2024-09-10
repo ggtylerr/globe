@@ -62,7 +62,7 @@ configure_nginx() {
     echo "[A] $domain -> $ip"
     read -p "Press enter when you have done so." -n 1 -r
 
-    sudo certbot certonly --nginx $domain
+    sudo certbot certonly --nginx -d $domain
     if [ $? -eq 0 ]; then
         sudo cp "../nginx/${conf}" /etc/nginx/sites-enabled/${output}
         sudo sed -i "s/domain/$domain/g" "/etc/nginx/sites-enabled/${output}"
@@ -78,7 +78,7 @@ configure_nginx() {
         fi
     else
         echo -e "${RED}ERROR:${NC} Could not get certificate! (DNS likely has not been updated yet.) Please get the certificate and add the nginx configuration later by running the following:"
-        echo "sudo certbot certonly --nginx $domain"
+        echo "sudo certbot certonly --nginx -d $domain"
         echo "sudo cp ${GREEN}globe${NC}/nginx/${conf} /etc/nginx/sites-enabled/${output}"
         echo "sudo sed -i 's/domain/$domain/g' /etc/nginx/sites-enabled/${output}"
         echo "sudo nginx -t"
@@ -244,7 +244,7 @@ if ! command -v node &> /dev/null || [[ $(node -v | cut -d. -f1) != "v16" ]]; th
 fi
 
 # jq (used in some scripts, like setting up docker's daemon.json)
-if [ ! command -v certbot &> /dev/null ]; then
+if [ ! command -v jq &> /dev/null ]; then
     if [ "$debian" = true ]; then
         echo -e "${YELLOW}WARN:${NC} jq not found. Installing..."
         if [ "$aptUpdated" = false ]; then
@@ -290,30 +290,38 @@ vis=$(echo "$potvis" | grep -oP '(?<=po_token: )[^ ]+')
 if [ -z "$pot" ] || [ -z "$vis" ]; then
     # comment out values if it can't generate it
     echo -e "${RED}ERROR:${NC} Could not generate a trusted session and get po_token / visitor_data values! If you are planning on running a public instance, please add these later on."
-    sed -i 's/po_token: .*/#po_token: changeme/g' ../services/invidious/docker-compose.yml
-    sed -i 's/visitor_data: .*/#visitor_data: changeme/g' ../services/invidious/docker-compose.yml
+    sed -i "s/po_token: .*/#po_token: changeme/g" ../services/invidious/docker-compose.yml
+    sed -i "s/visitor_data: .*/#visitor_data: changeme/g" ../services/invidious/docker-compose.yml
 else
-    sed -i 's/po_token: .*/po_token: $pot/g' ../services/invidious/docker-compose.yml
-    sed -i 's/visitor_data: .*/visitor_data: $vis/g' ../services/invidious/docker-compose.yml
+    sed -i "s/po_token: .*/po_token: $pot/g" ../services/invidious/docker-compose.yml
+    sed -i "s/visitor_data: .*/visitor_data: $vis/g" ../services/invidious/docker-compose.yml
 fi
 
 # admin, domain, banner
 read -i admin -p "What user do you want to set as admin? (Default 'admin') " invuser
 invuser=${invuser:-admin}
-sed -i '/admins:/!b;n;s/- .*/- $invuser/' ../services/invidious/docker-compose.yml
+sed -i "/admins:/!b;n;s/- .*/- $invuser/" ../services/invidious/docker-compose.yml
 
 while [ -z $invdomain ]; do
     read -p "What domain do you want to use? " invdomain
 done
-sed -i 's/domain: .*/domain: $invdomain/g' ../services/invidious/docker-compose.yml
+sed -i "s/domain: .*/domain: $invdomain/g" ../services/invidious/docker-compose.yml
 
 read -p "What do you want to set as the banner? (Default: none) " invbanner
-if [ -z "$invbanner" ]; then sed -i 's/banner: .*/#banner: changeme/g' ../services/invidious/docker-compose.yml;
-else sed -i 's/banner: .*/banner: $banner/g' ../services/invidious/docker-compose.yml; fi
+if [ -z "$invbanner" ]; then sed -i "s/banner: .*/#banner: changeme/g" ../services/invidious/docker-compose.yml;
+else sed -i "s/banner: .*/banner: $banner/g" ../services/invidious/docker-compose.yml; fi
 
 # IPv6
 read -p "Do you want to set up IPv6? (y/N) " -n 1 -r ipv6
 echo
+
+disable_ipv6() {
+    ipv6=n
+    sed -i "s/force-resolve: ipv6/#force-resolve: ipv6/g" ../services/invidious/docker-compose.yml
+    sed -i "s/host_binding: ::0/#host_binding: ::0/g" ../services/invidious/docker-compose.yml
+    sed -i "/networks:/,/^$/ s/^/# /" ../services/invidious/docker-compose.yml
+}
+
 if [[ $ipv6 =~ ^[Yy]$ ]]; then
     # test to see if IPv6 connectivity works
     if curl -m 5 ipv6.icanhazip.com > /dev/null 2>&1; then
@@ -321,7 +329,9 @@ if [[ $ipv6 =~ ^[Yy]$ ]]; then
         while [ -z $ipv6_range ]; do
             read -p "What is your IPv6 range? " ipv6_range
         done
-        sudo python ../smart-ipv6-rotator/smart-ipv6-rotator.py run --ipv6range=$ipv6_range
+        cd ..
+        sudo python smart-ipv6-rotator/smart-ipv6-rotator.py run --ipv6range=$ipv6_range
+        cd $scriptDir
         if [ $? -eq 0 ]; then
             # configure docker to use ipv6
             sudo cp /etc/docker/daemon.json /etc/docker/daemon.json.bak
@@ -344,13 +354,6 @@ else
     echo "No worries, you can always set it up later with this guide: https://docs.invidious.io/ipv6-rotator/"
     disable_ipv6
 fi
-
-disable_ipv6() {
-    ipv6=n
-    sed -i 's/force-resolve: ipv6/#force-resolve: ipv6/g' ../services/invidious/docker-compose.yml
-    sed -i 's/host_binding: ::0/#host_binding: ::0/g' ../services/invidious/docker-compose.yml
-    sed -i '/networks:/,/^$/ s/^/# /' ../services/invidious/docker-compose.yml
-}
 
 # add to crontab
 crontab -l | { cat; echo "0 * * * * ${scriptDir}/inv-restart.sh"; } | crontab -
@@ -383,7 +386,7 @@ sed -i "s/PROXY_HOSTNAME/${piproxy}/g" ../services/piped/docker-compose.yml
 
 # remove ipv6 if not configured
 if [ "$ipv6" = n ]; then
-    sed -i '/networks:/,/^$/ s/^/# /' ../services/piped/docker-compose.yml
+    sed -i "/networks:/,/^$/ s/^/# /" ../services/piped/docker-compose.yml
 fi
 
 configure_nginx $pifront "standard.conf" "piped_front.conf" 54302
