@@ -233,13 +233,13 @@ if [ ! command -v certbot &> /dev/null ]; then
     fi
 fi
 
-# node v16 (for poke)
-if ! command -v node &> /dev/null || [[ $(node -v | cut -d. -f1) != "v16" ]]; then
-    echo -e "${YELLOW}WARN:${NC} Node.JS v16 not found. Installing..."
+# node v18 (for poke)
+if ! command -v node &> /dev/null || [[ $(node -v | cut -d. -f1) != "v18" ]]; then
+    echo -e "${YELLOW}WARN:${NC} Node.JS v18 not found. Installing..."
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash
     export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-    nvm install 16
+    nvm install 18
     echo -e "${GREEN}Installed Node.JS!${NC}"
 fi
 
@@ -252,6 +252,22 @@ if [ ! command -v jq &> /dev/null ]; then
             aptUpdated=true
         fi
         sudo apt install -y jq
+        echo -e "${GREEN}Installed jq!${NC}"
+    else
+        skippedPKG=true
+        echo -e "${RED}ERROR:${NC} jq not found."
+    fi
+fi
+
+# sponge (used in some scripts, like setting up docker's daemon.json)
+if [ ! command -v sponge &> /dev/null ]; then
+    if [ "$debian" = true ]; then
+        echo -e "${YELLOW}WARN:${NC} jq not found. Installing..."
+        if [ "$aptUpdated" = false ]; then
+            sudo apt update
+            aptUpdated=true
+        fi
+        sudo apt install -y moreutils
         echo -e "${GREEN}Installed jq!${NC}"
     else
         skippedPKG=true
@@ -335,7 +351,8 @@ if [[ $ipv6 =~ ^[Yy]$ ]]; then
         if [ $? -eq 0 ]; then
             # configure docker to use ipv6
             sudo cp /etc/docker/daemon.json /etc/docker/daemon.json.bak
-            sudo jq '. += {"experimental": true, "ip6tables": true}' /etc/docker/daemon.json.bak | sudo tee /etc/docker/daemon.json > /dev/null
+            [ -s /etc/docker/daemon.json.bak ] || echo {} | sudo tee -a /etc/docker/daemon.json.bak
+            sudo jq '. += {"experimental": true, "ip6tables": true}' /etc/docker/daemon.json.bak | sudo sponge /etc/docker/daemon.json
             sudo systemctl restart docker
             # change range in rotate.sh
             echo $ipv6_range > range.txt
@@ -429,10 +446,11 @@ echo -e "${GREEN}Hyperpipe successfully set up!${NC}"
 echo "Setting up Poke..."
 
 # update config (ashley pls switch to config.json.example alr)
-jq --arg inv "$invdomain" '.invapi = inv' ../services/poke/config.json > ../services/poke/config.json
-jq --arg inv "$invdomain" '.invchannel = inv' ../services/poke/config.json > ../services/poke/config.json
-jq --arg inv "$invdomain" '.videourl = inv' ../services/poke/config.json > ../services/poke/config.json
-jq '.server_port = "54305"' ../services/poke/config.json > ../services/poke/config.json
+invdomainhttps="https://$invdomain"
+jq --arg inv "$invdomainhttps" '.invapi = $inv' ../services/poke/config.json | sponge ../services/poke/config.json
+jq --arg inv "$invdomainhttps" '.invchannel = $inv' ../services/poke/config.json | sponge ../services/poke/config.json
+jq --arg inv "$invdomainhttps" '.videourl = $inv' ../services/poke/config.json | sponge ../services/poke/config.json
+jq '.server_port = "54305"' ../services/poke/config.json | sponge ../services/poke/config.json
 
 while [ -z $pokedomain ]; do
     read -p "What domain do you want to use? " pokedomain
@@ -451,6 +469,7 @@ echo -e "${GREEN}Poke successfully set up!${NC}"
 # ------
 echo "Setting up RedLib..."
 cp ../services/redlib/docker-compose.template.yml ../services/redlib/docker-compose.yml
+cp ../services/redlib/.template.env ../services/redlib/.env
 
 while [ -z $redlibdomain ]; do
     read -p "What domain do you want to use? " redlibdomain

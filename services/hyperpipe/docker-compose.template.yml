@@ -23,7 +23,6 @@ services:
       - '54304:3000'
   watchtower:
     image: containrrr/watchtower
-    container_name: watchtower
     restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock

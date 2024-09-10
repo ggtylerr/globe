@@ -64,7 +64,6 @@ services:
     environment:
       - WATCHTOWER_CLEANUP=true
       - WATCHTOWER_INCLUDE_RESTARTING=true
-    container_name: watchtower
     command: piped-frontend piped-backend piped-proxy varnish nginx postgres watchtower
 
 volumes:
