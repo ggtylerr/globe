@@ -10,3 +10,6 @@
 [submodule "services/invidious"]
 	path = services/invidious
 	url = https://github.com/iv-org/invidious.git
+[submodule "services/poke"]
+	path = services/poke
+	url = https://codeberg.org/ashley/poke.git
