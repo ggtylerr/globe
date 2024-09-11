@@ -545,8 +545,9 @@ echo -e "${GREEN}BreezeWiki successfully set up!${NC}"
 # cobalt
 # ------
 echo "Setting up Cobalt..."
-cp ../services/cobalt/docker-compose.template.yml ../services/cobalt/docker-compose.yml
-cp ../services/cobalt/cookies.template.json ../services/cobalt/cookies.json
+cp ../services/cobalt-template/docker-compose.template.yml ../services/cobalt/docker-compose.yml
+cp ../services/cobalt-template/cookies.template.json ../services/cobalt/cookies.json
+cp ../services/cobalt-template/Dockerfile ../services/cobalt/Dockerfile-web
 
 while [ -z $cofront ]; do
     read -p "What domain do you want to use for the frontend? (e.g. co.ggtyler.dev) " cofront

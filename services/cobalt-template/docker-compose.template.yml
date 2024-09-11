@@ -1,7 +1,9 @@
 services:
 
   cobalt-web:
-    image: ghcr.io/imputnet/cobalt:latest
+    build:
+      context: .
+      dockerfile: Dockerfile-web
     restart: unless-stopped
     container_name: cobalt-web
     init: true
