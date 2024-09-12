@@ -16,7 +16,7 @@ services:
       - com.centurylinklabs.watchtower.scope=cobalt
       
   cobalt-api:
-    image: ghcr.io/imputnet/cobalt:latest
+    image: ghcr.io/imputnet/cobalt:10
     restart: unless-stopped
     container_name: cobalt-api
     init: true

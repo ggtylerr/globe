@@ -592,11 +592,11 @@ setup_cobalt() {
         read -p "What domain do you want to use for the backend? (e.g. coapi.ggtyler.dev) " coapi
     done
     while [ -z $coname ]; do
-        read -p "What name do you want to use? (e.g. ggt-nyc1)" coname
+        read -p "What name do you want to use? (e.g. ggt-nyc1) " coname
     done
 
     sed -i "s/frontendCHANGEME/$cofront/g" ../services/cobalt/docker-compose.yml
-    sed -i "s/backendCHANGEME/$coapi/g" ../services/cobalt/docker-compose.yml
+    sed -i "s/backendCHANGEME/https:\/\/$coapi/g" ../services/cobalt/docker-compose.yml
     sed -i "s/nameCHANGEME/$coname/g" ../services/cobalt/docker-compose.yml
 
     cd ../services/cobalt
@@ -605,16 +605,15 @@ setup_cobalt() {
     # ask for token
     docker compose exec cobalt-api npm run token:youtube
     # due to limitations with bash, we're gonna have to ask the user to paste the token in manually
-    while [ -z $cotoken ]; do
-        read -p "Paste the token from above: " -r cotoken
-    done
-    sed -i "s/changeme/$cotoken/g" ../services/cobalt/cookies.json
+    echo "Due to limitations with bash, you'll have to manually update the token."
+    echo "Copy the token from above, go to services/cobalt/cookies.json, and replace 'changeme' with the token."
+    read -p "Press enter when you have done so."
     docker compose down && docker compose up -d
 
+    cd $scriptDir
     configure_nginx $cofront "standard.conf" "cobalt_front.conf" 54311
     configure_nginx $coapi "standard.conf" "cobalt_api.conf" 54312
 
-    cd $scriptDir
     echo -e "${GREEN}Cobalt successfully set up!${NC}"
 }
 
@@ -624,7 +623,7 @@ setup_cobalt() {
 setup_searxng() {
     echo "Setting up SearXNG..."
     cp ../services/searxng/docker-compose.template.yml ../services/searxng/docker-compose.yml
-    cp ../services/searxng/.template.env ../services/searxng/.template.env
+    cp ../services/searxng/.template.env ../services/searxng/.env
     cp ../services/searxng/config/settings.template.yml ../services/searxng/config/settings.yml
     cp ../services/searxng/config/limiter.template.toml ../services/searxng/config/limiter.toml
     cp ../services/searxng/config/uwsgi.template.ini ../services/searxng/config/uwsgi.ini
