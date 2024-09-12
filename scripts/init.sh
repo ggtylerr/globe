@@ -260,16 +260,16 @@ fi
 # sponge (used in some scripts, like setting up docker's daemon.json)
 if [ ! command -v sponge &> /dev/null ]; then
     if [ "$debian" = true ]; then
-        echo -e "${YELLOW}WARN:${NC} jq not found. Installing..."
+        echo -e "${YELLOW}WARN:${NC} sponge not found. Installing..."
         if [ "$aptUpdated" = false ]; then
             sudo apt update
             aptUpdated=true
         fi
         sudo apt install -y moreutils
-        echo -e "${GREEN}Installed jq!${NC}"
+        echo -e "${GREEN}Installed sponge!${NC}"
     else
         skippedPKG=true
-        echo -e "${RED}ERROR:${NC} jq not found."
+        echo -e "${RED}ERROR:${NC} sponge not found."
     fi
 fi
 
@@ -328,7 +328,7 @@ setup_ipv6() {
                     # change range in rotate.sh
                     echo $ipv6_range > range.txt
                     # add to crontab
-                    sudo crontab -l | { cat; echo "@reboot sleep 30s && ${scriptDir}/rotate.sh"; echo "0 */12 0 0 0 ${scriptDir}/rotate.sh"; } | sudo crontab -
+                    sudo crontab -l | { cat; echo "@reboot sleep 30s && ${scriptDir}/rotate.sh"; echo "0 0 */12 * * ${scriptDir}/rotate.sh"; } | sudo crontab -
                     echo -e "${GREEN}IPv6 successfully set up!${NC}"
                 else
                     echo -e "${RED}ERROR:${NC} Smart IPv6 rotator failed! Please run it manually and resolve any errors."
