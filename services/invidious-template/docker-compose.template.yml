@@ -29,6 +29,7 @@ services:
         channel_threads: 0
         feed_threads: 0
         use_innertube_for_captions: true
+        modified_source_code_url: https://github.com/ggtylerr/invidious
         po_token: changeme
         visitor_data: changeme
         signature_server: sighelper:8080
@@ -67,6 +68,7 @@ services:
         banner: changeme
         enable_user_notifications: false
         use_pubsub_feeds: true
+        modified_source_code_url: https://github.com/ggtylerr/invidious
         po_token: changeme
         visitor_data: changeme
         signature_server: sighelper:8080
@@ -80,7 +82,7 @@ services:
       - sighelper
 
   invidious-db:
-    image: docker.io/library/postgres:13
+    image: docker.io/library/postgres:14
     restart: unless-stopped
     volumes:
       - postgresdata:/var/lib/postgresql/data
