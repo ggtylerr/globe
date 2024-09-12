@@ -4,7 +4,7 @@ services:
     build:
       context: ../..
       dockerfile: services/cobalt/Dockerfile-web
-      arg:
+      args:
         - WEB_URL=frontendCHANGEME
         - WEB_DEFAULT_API=backendCHANGEME
     restart: unless-stopped
