@@ -385,7 +385,7 @@ setup_invidious() {
 
     read -p "What do you want to set as the banner? (Default: none) " invbanner
     if [ -z "$invbanner" ]; then sed -i "s/banner: .*/#banner: changeme/g" ../services/invidious/docker-compose.yml;
-    else sed -i "s/banner: .*/banner: $banner/g" ../services/invidious/docker-compose.yml; fi
+    else sed -i "s/banner: .*/banner: $invbanner/g" ../services/invidious/docker-compose.yml; fi
 
     # IPv6
     if [ "$askedipv6" = false ]; then
