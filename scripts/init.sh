@@ -825,3 +825,34 @@ while getopts ":iphkrsdbcxytlvm" opt; do
             ;;
     esac
 done
+
+if [ $# -eq 0 ]; then
+    setup_invidious
+    setup_piped
+    setup_hyperpipe
+    setup_poke
+    setup_redlib
+    setup_safetwitch
+    setup_dumb
+    setup_breezewiki
+    setup_cobalt
+    setup_searxng
+    setup_librey
+    setup_simplytranslate
+    setup_libretranslate
+    setup_lingva
+    setup_mozhi
+    # add healthcheck.sh to crontab
+    ntfy=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+    echo $ntfy > ntfy.txt
+    crontab -l | { cat; echo "*/15 * * * * ${scriptDir}/healthcheck.sh"; } | crontab -
+    # print post-config steps
+    echo -e "${GREEN}All frontends set up, congratulations!${NC}"
+    echo "Here's some post-config steps:"
+    echo " - Make sure all your instances are reachable online"
+    echo " - Tweak any settings needed"
+    echo " - Subscribe to ntfy.sh/$ntfy for health check updates"
+    echo " - Do occasional updates"
+    echo " - Have fun and use responsibly!"
+    echo
+fi
