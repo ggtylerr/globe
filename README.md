@@ -36,6 +36,7 @@ Below is a list of frontends hosted, as well as any notes about their setup.
 * [Breezewiki](https://gitdab.com/cadence/breezewiki) *(port: 54310)*
   - Docker image [courtesy of PussTheCat.](https://github.com/PussTheCat-org/docker-breezewiki-quay)
 * [Cobalt](https://github.com/imputnet/cobalt) *(ports: 54311, 54312)*
+  - The web app is manually built with a custom image, due to the [lack of an docker image after v10.](https://github.com/imputnet/cobalt/issues/722)
 * [SearXNG](https://docs.searxng.org/) *(port: 54313)*
 * [LibreY](https://github.com/Ahwxorg/LibreY) *(port: 54314)*
 * [SimpleTranslate](https://codeberg.org/ManeraKai/simplytranslate/) *(port: 54315)*
@@ -46,8 +47,32 @@ Below is a list of frontends hosted, as well as any notes about their setup.
 ## Additional Notes
 
 While Project GLOBE is mostly complete, it was primarily designed around using a specific setup (Ubuntu, Nginx, Docker, etc.)
-We currently do not have the means to support other configurations (such as a fully bare metal host, or using Caddy.) Currently, there is also no way to only do a
-selection of frontends when using `init.sh`.
+We currently do not have the means to support other configurations (such as a fully bare metal host, or using Caddy.)
+
+By default, `init.sh` sets up all instances. However, you can use flags to set up only a selection of instances:
+
+```
+init.sh -irscx
+```
+
+These flags will be changed in the near future, but for the time being, they are:
+| Flag | Frontend        |
+| ---: | --------------- |
+| `-i` | Invidious       |
+| `-p` | Piped           |
+| `-h` | Hyperpipe       |
+| `-k` | Poke            |
+| `-r` | RedLib          |
+| `-s` | SafeTwitch      |
+| `-d` | Dumb            |
+| `-b` | Breezewiki      |
+| `-c` | Cobalt          |
+| `-x` | SearXNG         |
+| `-y` | LibreY          |
+| `-t` | SimplyTranslate |
+| `-l` | LibreTranslate  |
+| `-v` | Lingva          |
+| `-m` | Mozhi           |
 
 It should also be noted that due to the constantly changing nature of these services and the websites they proxy, they are not expected to
 last forever and updates should be done whenever possible. Most docker containers should be updated automatically via [Watchtower](https://containrrr.dev/watchtower/)
