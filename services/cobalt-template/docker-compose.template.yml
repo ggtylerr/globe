@@ -2,17 +2,16 @@ services:
 
   cobalt-web:
     build:
-      context: .
-      dockerfile: Dockerfile-web
+      context: ../..
+      dockerfile: services/cobalt/Dockerfile-web
+      arg:
+        - WEB_URL=frontendCHANGEME
+        - WEB_DEFAULT_API=backendCHANGEME
     restart: unless-stopped
     container_name: cobalt-web
     init: true
     ports:
-      - 54311:9001/tcp
-    environment:
-      - WEB_PORT=9001
-      - WEB_URL=frontendCHANGEME
-      - API_URL=backendCHANGEME
+      - 54311:8080/tcp
     labels:
       - com.centurylinklabs.watchtower.scope=cobalt
       
