@@ -747,7 +747,7 @@ setup_mozhi() {
 # -----
 
 # Note: this currently uses getopts for flags, but this WILL be changed in the future. Do not expect these flags to stay the same.
-while getopts "i:p" opt; do
+while getopts ":iphkrsdbcxytlvm" opt; do
     case $opt in
         i)
             setup_invidious
