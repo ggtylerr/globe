@@ -10,7 +10,7 @@ for srv in "$scriptDir/../services/"*; do
     echo "Service $name is unhealthy. Restarting..."
     docker compose down
     docker compose up -d
-    if name == "invidious"; then
+    if $name == "invidious"; then
       $scriptDir/rotate.sh
     fi
     sleep 30
