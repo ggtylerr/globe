@@ -41,7 +41,7 @@ services:
       - "54308:7000"
     environment:
       - PORT=7000
-      - URL=backendCHANGEME
+      - URL=https://backendCHANGEME
     healthcheck:
       test: wget -nv --tries=1 --spider http://localhost:7000/api/discover
       interval: 30s
