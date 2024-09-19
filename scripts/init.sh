@@ -363,8 +363,8 @@ setup_invidious() {
 
     # generate potoken + visitor_data
     potvis=$(docker run quay.io/invidious/youtube-trusted-session-generator)
-    pot=$(echo "$potvis" | grep -oP '(?<=visitor_data: )[^ ]+')
-    vis=$(echo "$potvis" | grep -oP '(?<=po_token: )[^ ]+')
+    pot=$(echo "$potvis" | grep -oP '(?<=po_token: )[^ ]+')
+    vis=$(echo "$potvis" | grep -oP '(?<=visitor_data: )[^ ]+')
 
     if [ -z "$pot" ] || [ -z "$vis" ]; then
         # comment out values if it can't generate it
