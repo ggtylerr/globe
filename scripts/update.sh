@@ -25,33 +25,37 @@ if [ "$VERSION_CODE" -lt "$LATEST_VERS" ]; then
                 fi
                 if [[ "$dir" == "cobalt/" ]]; then
                     echo "Updating $dir..."
-                    sed -i "s/--interval [0-9]*/--interval 3600/" "$dir/docker-compose.yml"
+                    cd "$dir"
+                    sed -i "s/--interval [0-9]*/--interval 3600/" "docker-compose.yml"
                     docker compose restart watchtower
+                    cd ..
                     continue
                 fi
                 if [[ "$dir" == "hyperpipe/" || "$dir" == "piped/" ]]; then
                     echo "Updating $dir..."
-                    sed -i '/command:.*/& --interval 3600/' "$dir/docker-compose.yml"
+                    cd "$dir"
+                    sed -i '/command:.*/a --interval 3600/' "docker-compose.yml"
                     docker compose restart watchtower
+                    cd ..
                     continue
                 fi
                 if [ -f "$dir/docker-compose.yml" ]; then
                     echo "Updating $dir..."
-                    if grep -q "watchtower" "$dir/docker-compose.yml"; then
-                        # Tried to make this fancy but looks like this isn't working,
-                        # hence the if statements up top. If anyone else can do it,
-                        # feel free to PR ~ tyler
-                        sed -i '/watchtower:/,/^[^ ]/{
-                            /command:/ {
-                                /--interval/ s/--interval [0-9]*/--interval 3600/
-                                /--interval/! s/command:.*/& --interval 3600/ 
-                            }
-                            /command:/!{
-                                /watchtower:/a \ \ \ \ command: --interval 3600
-                            }
-                        }' "$dir/docker-compose.yml"
-                        docker compose restart watchtower
-                    fi
+                    cd "$dir"
+                    # Tried to make this fancy but looks like this isn't working,
+                    # hence the if statements up top. If anyone else can do it,
+                    # feel free to PR ~ tyler
+                    sed -i '/watchtower:/,/^[^ ]/{
+                        /command:/ {
+                            /--interval/ s/--interval [0-9]*/--interval 3600/
+                            /--interval/! s/command:.*/& --interval 3600/ 
+                        }
+                        /command:/!{
+                            /watchtower:/a \ \ \ \ command: --interval 3600
+                        }
+                    }' "$dir/docker-compose.yml"
+                    docker compose restart watchtower
+                    cd ..
                 fi
             done
             cd $scriptDir
