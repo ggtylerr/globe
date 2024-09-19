@@ -53,7 +53,7 @@ if [ "$VERSION_CODE" -lt "$LATEST_VERS" ]; then
                         /command:/!{
                             /watchtower:/a \ \ \ \ command: --interval 3600
                         }
-                    }' "$dir/docker-compose.yml"
+                    }' "docker-compose.yml"
                     docker compose restart watchtower
                     cd ..
                 fi
