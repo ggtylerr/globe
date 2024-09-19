@@ -34,7 +34,7 @@ if [ "$VERSION_CODE" -lt "$LATEST_VERS" ]; then
                 if [[ "$dir" == "hyperpipe/" || "$dir" == "piped/" ]]; then
                     echo "Updating $dir..."
                     cd "$dir"
-                    sed -i '/command:.*/a --interval 3600/' "docker-compose.yml"
+                    sed -i '/command:.*/s/$/ --interval 3600/' "docker-compose.yml"
                     docker compose restart watchtower
                     cd ..
                     continue
