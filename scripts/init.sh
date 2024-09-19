@@ -21,6 +21,11 @@ $'            ,,,,,,
         PROJECT GLOBE
 '
 
+# Copy version code
+scriptDir=$(dirname "$(readlink -f "$0")")
+cd $scriptDir # ensures directory specific commands work
+cp ./version-code.latest.txt ./version-code.txt
+
 read -p "This script will check for dependencies, install them if needed, and automatically configure ALL frontends. Continue? (y/N) " -n 1 -r
 echo
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -42,8 +47,6 @@ aptUpdated=false
 dockerChange=false
 
 # extra vars
-scriptDir=$(dirname "$(readlink -f "$0")")
-cd $scriptDir # ensures directory specific commands work
 ip=$(curl -m 5 ipv4.icanhazip.com)
 
 # cert + nginx func

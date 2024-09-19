@@ -9,3 +9,4 @@ services/searxng/config/uwsgi.ini
 # GLOBE configs
 range.txt
 ntfy.txt
+version-code.txt

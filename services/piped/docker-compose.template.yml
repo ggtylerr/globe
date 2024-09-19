@@ -64,7 +64,7 @@ services:
     environment:
       - WATCHTOWER_CLEANUP=true
       - WATCHTOWER_INCLUDE_RESTARTING=true
-    command: piped-frontend piped-backend piped-proxy varnish nginx postgres watchtower
+    command: piped-frontend piped-backend piped-proxy varnish nginx postgres watchtower --interval 3600
 
 volumes:
   piped-proxy: null

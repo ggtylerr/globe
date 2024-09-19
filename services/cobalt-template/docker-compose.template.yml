@@ -12,8 +12,6 @@ services:
     init: true
     ports:
       - 54311:8080/tcp
-    labels:
-      - com.centurylinklabs.watchtower.scope=cobalt
       
   cobalt-api:
     image: ghcr.io/imputnet/cobalt:10
@@ -28,14 +26,14 @@ services:
       - API_NAME=nameCHANGEME
       - COOKIE_PATH=/cookies.json
     labels:
-      - com.centurylinklabs.watchtower.scope=cobalt
+      - com.centurylinklabs.watchtower.scope=cobalt-api
     volumes:
       - ./cookies.json:/cookies.json
 
   watchtower:
     image: ghcr.io/containrrr/watchtower
     restart: unless-stopped
-    command: --cleanup --scope cobalt --interval 900
+    command: --cleanup --scope cobalt-api --interval 3600
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 

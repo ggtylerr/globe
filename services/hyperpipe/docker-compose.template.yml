@@ -30,4 +30,4 @@ services:
     environment:
       - WATCHTOWER_CLEANUP=true
       - WATCHTOWER_INCLUDE_RESTARTING=true
-    command: hyperpipe-frontend hyperpipe-backend watchtower
+    command: hyperpipe-frontend hyperpipe-backend watchtower --interval 3600
